@@ -13,6 +13,7 @@ Usage:  python3.8 sapt_energy_extraction_data.py
 import os, re
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 path = 'D:\\Coronavirus\\6VYO\\docked_first_poses\\6VYO_Zn\\complex\\SAPT\\Nprx_proba'
 dirfiles = os.listdir(path)
@@ -151,7 +152,25 @@ def total_sapt0_plot():
                      fontsize=10)
     plt.xticks(rotation=90, fontsize=8)
     plt.savefig('sapt_total_sapt0.tiff', dpi=300)
-    plt.show()    
+    plt.show()  
+
+def excel_write():
+    df = pd.DataFrame({
+        'Contacts':      contacts,
+        'Eletrostatics': electrostatics_list,
+        'Echange':       exchange_list,
+        'Induction':     induction_list,
+        'Dispersion':    dispersion_list,
+        'Total SAPT0':    total_sapt0_list})
+    df = df[['Contacts', 'Eletrostatics', 'Echange', 'Induction', 'Dispersion', 'Total SAPT0']]
+    writer = pd.ExcelWriter('sapt_energy_calculations.xlsx', engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1', startrow=1, header=False, index=False)
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+    (max_row, max_col) = df.shape
+    column_settings = [{'header': column} for column in df.columns]
+    worksheet.add_table(0,0,max_row,max_col-1, {'columns': column_settings})
+    writer.save()
 
 extracting_data()
 eletrostatics_plot()
@@ -159,4 +178,5 @@ exchange_plot()
 induction_plot()
 dispersion_plot()
 total_sapt0_plot()
+excel_write()
 
